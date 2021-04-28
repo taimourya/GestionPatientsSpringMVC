@@ -1,0 +1,181 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org"
+                xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+                layout:decorate="base">
+<head>
+    <title>Patients</title>
+</head>
+<body>
+
+    <div layout:fragment="content">
+
+        <div class="container mt-5">
+            <div class="card">
+                <div class="card-header">
+                    Liste des patients
+                </div>
+
+                <div class="card-body">
+                    <form class="form-inline my-2 my-lg-0" method="get" th:action="@{patients}">
+                       <input type="hidden" th:value="${size}" name="size">
+                        <input class="form-control mr-sm-2" type="search" th:value="${mc}" name="mc" placeholder="Search" aria-label="Search">
+                        <button class="btn btn-outline-success my-2 my-sm-0" type="submit">Search</button>
+                    </form>
+                    <button type="button" id="btn_formPatient" class="btn btn-outline-primary mt-2" data-toggle="modal" data-target="#formPatient">
+                        Ajouter
+                    </button>
+
+                    <ul class="pagination mt-3">
+                        <li th:class="${size == 5}? 'page-item active': 'page-item'">
+                            <a th:href="@{patients(size=5, mc=${mc})}" class="page-link">5</a>
+                        </li>
+                        <li th:class="${size == 10}? 'page-item active': 'page-item'">
+                            <a th:href="@{patients(size=10, mc=${mc})}" class="page-link">10</a>
+                        </li>
+                        <li th:class="${size == 15}? 'page-item active': 'page-item'">
+                            <a th:href="@{patients(size=15, mc=${mc})}" class="page-link">15</a>
+                        </li>
+                    </ul>
+
+                    <table class="table table-striped mt-3">
+                        <tr>
+                            <th>Nom</th>
+                            <th>Date naissance</th>
+                            <th>malade</th>
+                            <th></th>
+                            <th></th>
+                        </tr>
+                        <tr th:each="p:${patients}">
+                            <td th:text="${p.nom}"></td>
+                            <td th:text="${p.dateNaissance}"></td>
+                            <td th:text="${p.malade}"></td>
+                            <td>
+                                <a th:data-id="${p.id}" class="btn btn-success btnUpdate">
+                                    Update
+                                </a>
+                            </td>
+                            <td>
+                                <a th:href="@{removePatient(id=${p.id}, page=${currentPage}, size=${size}, mc=${mc})}" class="btn btn-danger">
+                                    Delete
+                                </a>
+                            </td>
+                        </tr>
+                    </table>
+                </div>
+            </div>
+            <ul class="pagination">
+                <li th:each="page,status:${pages}"  th:class="${currentPage == status.index}? 'page-item active': 'page-item'">
+                    <a th:href="@{patients(page=${status.index}, size=${size}, mc=${mc})}"
+                       th:text="${status.count}" class="page-link"></a>
+                </li>
+            </ul>
+        </div>
+
+
+        <div class="modal fade" id="formPatient" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel" aria-hidden="true">
+            <div class="modal-dialog" role="document">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h5 class="modal-title" id="exampleModalLabel">Ajouter un patient</h5>
+                        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                            <span aria-hidden="true">&times;</span>
+                        </button>
+                    </div>
+                    <form th:action="@{savePatient}" method="post" id="formulairePatient">
+                        <input type="hidden" name="id" class="form-control" th:value="${patient.id}"/>
+                        <div class="modal-body">
+                            <div class="form-group">
+                                <label class="control-label">Nom *</label>
+                                <input type="text" name="nom" class="form-control" th:value="${patient.nom}"/>
+                                <span th:errors="${patient.nom}" class="text-danger"></span>
+                            </div>
+                            <div class="form-group">
+                                <label class="control-label">Date naissance *</label>
+                                <input type="date" name="dateNaissance" class="form-control" th:value="${patient.dateNaissance}"/>
+                                <span th:errors="${patient.dateNaissance}" class="text-danger"></span>
+                            </div>
+                            <div class="form-group">
+                                <label class="control-label">Malade * : </label>
+                                <input type="checkbox" name="malade" th:checked="${patient.malade}"/>
+                                <span th:errors="${patient.malade}" class="text-danger"></span>
+                            </div>
+                        </div>
+                        <div class="modal-footer">
+                            <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+                            <button type="submit" class="btn btn-primary">Save</button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+
+    </div>
+
+    <div layout:fragment="scripts">
+        <script th:if="${errorSavePatient != null}">
+            //show modal pour afficher les erreur du formulaire
+            $(document).ready(function() {
+                $('#formPatient').modal('show');
+            });
+        </script>
+
+        <script>
+            //functions ajax
+            function getPatientByIdFromController(id) {
+                return fetch("/patient/get/"+id).then(function (response) {
+                    return response.json();
+                }).catch(function (error) {
+                    console.log(error);
+                });
+            }
+        </script>
+
+        <script>
+            //gerer event click sur les boutons update
+            var AllbtnUpdate = document.querySelectorAll(".btnUpdate");
+            AllbtnUpdate.forEach(function (btn) {
+                btn.addEventListener('click', function () {
+                    var id = this.getAttribute("data-id");
+
+                    getPatientByIdFromController(id).then(function (data) {
+                        //show modal
+                        $('#formPatient').modal('show');
+
+
+                        var formulairePatient = document.getElementById("formulairePatient");
+                        var inputs = formulairePatient.querySelectorAll("input");
+                        var spans = formulairePatient.querySelectorAll("span");
+
+                        spans.forEach(function (span) {
+                            //supprimer les erreurs afficher dans les spans
+                            span.innerHTML = "";
+                        });
+
+                        //remplire les inputs par les info du patient fetcher
+                        inputs[0].value = data.id;
+                        inputs[1].value = data.nom;
+                        inputs[2].value = data.dateNaissance;
+                        inputs[3].checked = data.malade;
+
+                    })
+                });
+            });
+
+
+            var btn_formPatient = document.getElementById("btn_formPatient");
+
+            //si on click sur ajouter l'input hidden qui contient l'id du patient doit etre remis a 0 pour la creation d'un nouveau patient
+            btn_formPatient.addEventListener('click', function () {
+                var formulairePatient = document.getElementById("formulairePatient");
+                var inputs = formulairePatient.querySelectorAll("input");
+                inputs[0].value = 0;
+            });
+
+
+        </script>
+
+    </div>
+
+
+</body>
+</html>
