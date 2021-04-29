@@ -76,7 +76,7 @@
             <div class="modal-dialog" role="document">
                 <div class="modal-content">
                     <div class="modal-header">
-                        <h5 class="modal-title" id="exampleModalLabel">Ajouter un patient</h5>
+                        <h5 class="modal-title" id="modalTitle">Ajouter un patient</h5>
                         <button type="button" class="close" data-dismiss="modal" aria-label="Close">
                             <span aria-hidden="true">&times;</span>
                         </button>
@@ -151,6 +151,8 @@
                             span.innerHTML = "";
                         });
 
+                        //changer le titre du formulaire
+                        document.getElementById("modalTitle").innerHTML = "Modification d'un patient";
                         //remplire les inputs par les info du patient fetcher
                         inputs[0].value = data.id;
                         inputs[1].value = data.nom;
@@ -168,7 +170,14 @@
             btn_formPatient.addEventListener('click', function () {
                 var formulairePatient = document.getElementById("formulairePatient");
                 var inputs = formulairePatient.querySelectorAll("input");
+
+                //changer le titre du formulaire
+                document.getElementById("modalTitle").innerHTML = "Ajouter un nouveau patient";
+                //remplire les inputs par les info par defauts
                 inputs[0].value = 0;
+                inputs[1].value = "";
+                inputs[2].value = "";
+                inputs[3].checked = "";
             });
 
 
