@@ -119,16 +119,7 @@
             });
         </script>
 
-        <script>
-            //functions ajax
-            function getPatientByIdFromController(id) {
-                return fetch("/patient/get/"+id).then(function (response) {
-                    return response.json();
-                }).catch(function (error) {
-                    console.log(error);
-                });
-            }
-        </script>
+        <script src="js/AjaxFunctions.js"></script>
 
         <script>
             //gerer event click sur les boutons update
@@ -174,10 +165,10 @@
                 //changer le titre du formulaire
                 document.getElementById("modalTitle").innerHTML = "Ajouter un nouveau patient";
                 //remplire les inputs par les info par defauts
-                inputs[0].value = 0;
+                inputs[0].value = "";
                 inputs[1].value = "";
                 inputs[2].value = "";
-                inputs[3].checked = "";
+                inputs[3].checked = false;
             });
 
 
