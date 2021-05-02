@@ -1,7 +1,9 @@
 <!DOCTYPE html>
 <html lang="en" xmlns:th="http://www.thymeleaf.org"
                 xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
-                layout:decorate="base">
+                xmlns:sec="http://www.thymeleaf.org/thymeleaf-extras-springsecurity5"
+                layout:decorate="base"
+>
 <head>
     <title>Patients</title>
 </head>
@@ -21,7 +23,7 @@
                         <input class="form-control mr-sm-2" type="search" th:value="${mc}" name="mc" placeholder="Search" aria-label="Search">
                         <button class="btn btn-outline-success my-2 my-sm-0" type="submit">Search</button>
                     </form>
-                    <button type="button" id="btn_formPatient" class="btn btn-outline-primary mt-2" data-toggle="modal" data-target="#formPatient">
+                    <button sec:authorize="hasRole('ADMIN')"  type="button" id="btn_formPatient" class="btn btn-outline-primary mt-2" data-toggle="modal" data-target="#formPatient">
                         Ajouter
                     </button>
 
@@ -50,12 +52,12 @@
                             <td th:text="${p.dateNaissance}"></td>
                             <td th:text="${p.malade}"></td>
                             <td>
-                                <a th:data-id="${p.id}" class="btn btn-success btnUpdate">
+                                <a sec:authorize="hasRole('ADMIN')" th:data-id="${p.id}" class="btn btn-success btnUpdate">
                                     Update
                                 </a>
                             </td>
                             <td>
-                                <a th:href="@{removePatient(id=${p.id}, page=${currentPage}, size=${size}, mc=${mc})}" class="btn btn-danger">
+                                <a sec:authorize="hasRole('ADMIN')"  th:href="@{removePatient(id=${p.id}, page=${currentPage}, size=${size}, mc=${mc})}" class="btn btn-danger">
                                     Delete
                                 </a>
                             </td>
@@ -72,7 +74,7 @@
         </div>
 
 
-        <div class="modal fade" id="formPatient" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel" aria-hidden="true">
+        <div sec:authorize="hasRole('ADMIN')" class="modal fade" id="formPatient" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel" aria-hidden="true">
             <div class="modal-dialog" role="document">
                 <div class="modal-content">
                     <div class="modal-header">
@@ -129,6 +131,9 @@
                     var id = this.getAttribute("data-id");
 
                     getPatientByIdFromController(id).then(function (data) {
+
+                        console.log(data);
+
                         //show modal
                         $('#formPatient').modal('show');
 
@@ -137,6 +142,9 @@
                         var inputs = formulairePatient.querySelectorAll("input");
                         var spans = formulairePatient.querySelectorAll("span");
 
+
+                        console.log(inputs);
+
                         spans.forEach(function (span) {
                             //supprimer les erreurs afficher dans les spans
                             span.innerHTML = "";
@@ -144,11 +152,14 @@
 
                         //changer le titre du formulaire
                         document.getElementById("modalTitle").innerHTML = "Modification d'un patient";
+
                         //remplire les inputs par les info du patient fetcher
-                        inputs[0].value = data.id;
-                        inputs[1].value = data.nom;
-                        inputs[2].value = data.dateNaissance;
-                        inputs[3].checked = data.malade;
+                        //QUESTION :: pourquoi indice 0 contient un input _csrf ?????
+                        //REPONSE  :: input _csrf et ajouter par spring security et il permet d'eviter la fail Cross-site request forgery (csrf)
+                        inputs[1].value = data.id;
+                        inputs[2].value = data.nom;
+                        inputs[3].value = data.dateNaissance;
+                        inputs[4].checked = data.malade;
 
                     })
                 });
@@ -161,14 +172,18 @@
             btn_formPatient.addEventListener('click', function () {
                 var formulairePatient = document.getElementById("formulairePatient");
                 var inputs = formulairePatient.querySelectorAll("input");
+                console.log(inputs);
 
                 //changer le titre du formulaire
                 document.getElementById("modalTitle").innerHTML = "Ajouter un nouveau patient";
                 //remplire les inputs par les info par defauts
-                inputs[0].value = "";
+                //QUESTION :: pourquoi indice 0 contient un input _csrf ?????
+                //REPONSE  :: input _csrf et ajouter par spring security et il permet d'eviter par defaut la fail
+                //            Cross-site request forgery (csrf) pour la desactiver http.csrf().disabled();
                 inputs[1].value = "";
                 inputs[2].value = "";
-                inputs[3].checked = false;
+                inputs[3].value = "";
+                inputs[4].checked = false;
             });
 
 

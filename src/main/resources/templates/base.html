@@ -1,6 +1,8 @@
 <!DOCTYPE html>
 <html lang="en" xmlns:th="http://www.thymeleaf.org"
-                xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout">
+                xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+                xmlns:sec="http://www.thymeleaf.org/thymeleaf-extras-springsecurity5"
+>
 <head>
     <meta charset="UTF-8">
     <title>Gestion Patients</title>
@@ -19,7 +21,8 @@
                 <div class="navbar-nav">
                     <a class="nav-item nav-link active" href="">Home <span class="sr-only">(current)</span></a>
                     <a class="nav-item nav-link" th:href="@{patients}">Patients</a>
-                    <a class="nav-item nav-link" href="#">Pricing</a>
+                    <a sec:authorize="isAnonymous()" class="nav-item nav-link" th:href="@{login}">Login</a>
+                    <a sec:authorize="isAuthenticated()" class="nav-item nav-link" th:href="@{logout}">Logout</a>
                 </div>
             </div>
         </nav>
